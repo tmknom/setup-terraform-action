@@ -1,23 +1,58 @@
-name: Rename me
+name: Setup Terraform
 description: |
-  Template repository for creating Composite Action with GitHub Actions.
+  This action sets up [Terraform CLI](https://www.terraform.io/) in your GitHub Actions workflow by:
+
+  - Downloading a specified version of Terraform CLI and adding it to the 'PATH'
+
+  This enables Terraform CLI commands to execute just like they do on your local environment.
 
   ## Usage
 
-  Write usage for your Composite Action.
-
   ```yaml
     steps:
-      - name: Template
-        uses: tmknom/template-composite-action@v0
+      - name: Setup Terraform
+        uses: tmknom/setup-terraform-action@v0
+        with:
+          terraform-version: 1.2.3
   ```
+
+inputs:
+  terraform-version:
+    required: false
+    description: The version of Terraform CLI to install.
 
 runs:
   using: composite
 
   steps:
-    - name: Run
-      shell: bash
+    - name: Create install dir
+      id: install
       run: |
+        echo "::group::Create install dir"
         set -x
-        echo "Write steps"
+        repo="$(cut -d / -f 7 <<<"${GITHUB_ACTION_PATH}")"
+        owner="$(cut -d / -f 6 <<<"${GITHUB_ACTION_PATH}")"
+        install_dir="${RUNNER_TEMP}/__${owner}-${repo}"
+        echo "path=${install_dir}" >> "${GITHUB_OUTPUT}"
+        mkdir -p "${install_dir}"
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Install Terraform
+      working-directory: ${{ steps.install.outputs.path }}
+      env:
+        VERSION: ${{ inputs.terraform-version }}
+      run: |
+        echo "::group::Install Terraform"
+        set -x
+        archive_file="terraform_${VERSION}_linux_amd64.zip"
+        base_url="https://releases.hashicorp.com/terraform/${VERSION}"
+        curl -sSLO "${base_url}/${archive_file}"
+
+        # Install binary and set path
+        bin_path="${PWD}/bin"
+        mkdir -p "${bin_path}"
+        unzip "${PWD}/${archive_file}" -d "${bin_path}"
+        echo "${bin_path}" >> "${GITHUB_PATH}"
+        echo "::endgroup::"
+      shell: bash
