@@ -1,26 +1,32 @@
-# template-composite-action
+# setup-terraform-action
 
-Template repository for Composite Action.
+Set up your GitHub Actions workflow with a specific version of Terraform.
 
 <!-- actdocs start -->
 
 ## Description
 
-Template repository for creating Composite Action with GitHub Actions.
+This action sets up [Terraform CLI](https://www.terraform.io/) in your GitHub Actions workflow by:
+
+- Downloading a specified version of Terraform CLI and adding it to the 'PATH'
+
+This enables Terraform CLI commands to execute just like they do on your local environment.
 
 ## Usage
 
-Write usage for your Composite Action.
-
 ```yaml
   steps:
-    - name: Template
-      uses: tmknom/template-composite-action@v0
+    - name: Setup Terraform
+      uses: tmknom/setup-terraform-action@v0
+      with:
+        terraform-version: 1.2.3
 ```
 
 ## Inputs
 
-N/A
+| Name | Description | Default | Required |
+| :--- | :---------- | :------ | :------: |
+| terraform-version | The version of Terraform CLI to install. | n/a | no |
 
 ## Outputs
 
@@ -48,4 +54,4 @@ See [GitHub Releases][releases].
 
 Apache 2 Licensed. See [LICENSE](LICENSE) for full details.
 
-[releases]: https://github.com/tmknom/template-composite-action/releases
+[releases]: https://github.com/tmknom/setup-terraform-action/releases
