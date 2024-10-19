@@ -25,24 +25,13 @@ jobs:
       - name: Checkout
         uses: tmknom/checkout-action@v1
 
-      - name: Setup
-        run: |
-          set -x
-          echo "Setup"
-
       - name: Exercise
         id: exercise
         uses: ./
+        with:
+          terraform-version: 1.2.3
 
       - name: Verify
-        env:
-          OUTCOME: ${{ steps.exercise.outcome }}
         run: |
           set -x
-          test "${OUTCOME}" = "success"
-
-      - name: Teardown
-        if: ${{ always() }}
-        run: |
-          set -x
-          echo "Teardown"
+          test "$(terraform -version | head -n 1)" = 'Terraform v1.2.3'
