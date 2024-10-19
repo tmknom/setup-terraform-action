@@ -75,6 +75,9 @@ runs:
         gpg --verify "${signature_file}" "${checksum_file}"
         grep "${archive_file}" "${checksum_file}" | sha256sum --check
 
+        cp "${archive_file}" "terraform_1.2.3_darwin_amd64.zip"
+        grep "terraform_1.2.3_darwin_amd64.zip" "${checksum_file}" | sha256sum --check
+
         # Install binary and set path
         bin_path="${PWD}/bin"
         mkdir -p "${bin_path}"
