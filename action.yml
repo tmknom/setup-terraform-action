@@ -3,6 +3,7 @@ description: |
   This action sets up [Terraform CLI](https://www.terraform.io/) in your GitHub Actions workflow by:
 
   - Downloading a specified version of Terraform CLI and adding it to the 'PATH'
+  - Verifying that the downloaded binary is created and signed by HashiCorp before installation
 
   This enables Terraform CLI commands to execute just like they do on your local environment.
 
@@ -38,6 +39,21 @@ runs:
         echo "::endgroup::"
       shell: bash
 
+    # Security at HashiCorp
+    # https://www.hashicorp.com/trust/security
+    - name: Import PGP public key
+      working-directory: ${{ steps.install.outputs.path }}
+      run: |
+        echo "::group::Import PGP public key"
+        set -x
+        key_file="pgp-key.txt"
+        curl -sSLO "https://www.hashicorp.com/.well-known/${key_file}"
+        gpg --import "${key_file}"
+        echo "::endgroup::"
+      shell: bash
+
+    # Verify HashiCorp binary downloads
+    # https://developer.hashicorp.com/well-architected-framework/operational-excellence/verify-hashicorp-binary
     - name: Install Terraform
       working-directory: ${{ steps.install.outputs.path }}
       env:
@@ -46,10 +62,22 @@ runs:
         echo "::group::Install Terraform"
         set -x
         archive_file="terraform_${VERSION}_linux_amd64.zip"
+        checksum_file="terraform_${VERSION}_SHA256SUMS"
+        signature_file="terraform_${VERSION}_SHA256SUMS.sig"
+
+        # Download archive, checksum, and signature files
         base_url="https://releases.hashicorp.com/terraform/${VERSION}"
         curl -sSLO "${base_url}/${archive_file}"
+        curl -sSLO "${base_url}/${checksum_file}"
+        curl -sSLO "${base_url}/${signature_file}"
 
-        # Install binary and set path
+        # Verify signature and checksum files
+        gpg --verify "${signature_file}" "${checksum_file}"
+
+        # Verify checksum and archive files
+        grep "${archive_file}" "${checksum_file}" | sha256sum --check
+
+        # Install binary and set path variables
         bin_path="${PWD}/bin"
         mkdir -p "${bin_path}"
         unzip "${PWD}/${archive_file}" -d "${bin_path}"
