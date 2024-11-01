@@ -43,11 +43,29 @@ runs:
     # https://www.hashicorp.com/trust/security
     - name: Import PGP public key
       working-directory: ${{ steps.install.outputs.path }}
+      env:
+        EXPECTED_FINGERPRINT: C874 011F 0AB4 0511 0D02 1055 3436 5D94 72D7 468F
       run: |
         echo "::group::Import PGP public key"
         set -x
         key_file="pgp-key.txt"
         curl -sSLO "https://www.hashicorp.com/.well-known/${key_file}"
+
+        # pub   rsa4096 2021-04-19 [SC] [expires: 2026-04-18]
+        #       C874 011F 0AB4 0511 0D02  1055 3436 5D94 72D7 468F
+        # uid                      HashiCorp Security (hashicorp.com/security) <security@hashicorp.com>
+        # sub   rsa4096 2021-04-19 [E] [expires: 2026-04-18]
+        # sub   rsa4096 2021-04-19 [S] [expired: 2022-04-20]
+        # sub   rsa4096 2021-04-21 [S] [expires: 2026-04-20]
+        key_info="$(gpg --with-fingerprint --show-keys "${key_file}")"
+
+        # Verify and import PGP public key
+        fingerprint="$(grep -A 1 "pub " <<<"${key_info}" | tail -1 | sed 's/^[[:space:]]*//' | tr -s ' ')"
+        if [[ "${fingerprint}" != "${EXPECTED_FINGERPRINT}" ]]; then
+          message="actual fingerprint: '${fingerprint}', see details https://www.hashicorp.com/trust/security"
+          echo "::error title=Invalid PGP public key::${message}"
+          exit 1
+        fi
         gpg --import "${key_file}"
         echo "::endgroup::"
       shell: bash
