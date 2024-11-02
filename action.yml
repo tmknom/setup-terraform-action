@@ -4,6 +4,7 @@ description: |
 
   - Downloading a specified version of Terraform CLI and adding it to the 'PATH'
   - Verifying that the downloaded binary is created and signed by HashiCorp before installation
+  - Setting the `TF_PLUGIN_CACHE_DIR` environment variable to enable the plugin cache
 
   This enables Terraform CLI commands to execute just like they do on your local environment.
 
