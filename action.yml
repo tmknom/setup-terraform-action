@@ -103,3 +103,17 @@ runs:
         echo "${bin_path}" >> "${GITHUB_PATH}"
         echo "::endgroup::"
       shell: bash
+
+    - name: Log details
+      if: ${{ failure() || runner.debug }}
+      working-directory: ${{ steps.install.outputs.path }}
+      env:
+        INPUTS: ${{ toJSON(inputs) }}
+      run: |
+        echo "::group::Log details"
+        echo "${INPUTS}"
+        set -x
+        tree -ah "${PWD}"
+        gpg --with-fingerprint --show-keys "${GITHUB_ACTION_PATH}/pgp-key.txt"
+        echo "::endgroup::"
+      shell: bash
