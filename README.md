@@ -8,7 +8,7 @@ Set up your GitHub Actions workflow with a specific version of Terraform.
 
 This action sets up [Terraform CLI](https://www.terraform.io/) in your GitHub Actions workflow by:
 
-- Downloading a specified version of Terraform CLI and adding it to the 'PATH'
+- Downloading a specified version of Terraform CLI and adding it to the `PATH`
 - Verifying that the downloaded binary is created and signed by HashiCorp before installation
 - Setting the `TF_PLUGIN_CACHE_DIR` environment variable to enable the plugin cache
 
