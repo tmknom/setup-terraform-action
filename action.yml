@@ -48,8 +48,9 @@ runs:
       run: |
         echo "::group::Import PGP public key"
         set -x
-        key_file="pgp-key.txt"
-        curl -sSLO "https://www.hashicorp.com/.well-known/${key_file}"
+
+        # Downloaded in advance from https://www.hashicorp.com/.well-known/pgp-key.txt
+        key_file="${GITHUB_ACTION_PATH}/pgp-key.txt"
 
         # pub   rsa4096 2021-04-19 [SC] [expires: 2026-04-18]
         #       C874 011F 0AB4 0511 0D02  1055 3436 5D94 72D7 468F
