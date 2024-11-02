@@ -31,7 +31,7 @@ runs:
       run: |
         echo "::group::Create install dir"
         set -x
-        repo="$(cut -d / -f 7 <<<"${GITHUB_ACTION_PATH}")"
+        repo="$(cut -d / -f 7 <<<"${GITHUB_ACTION_PATH/./${GITHUB_REPOSITORY_ID}}")"
         owner="$(cut -d / -f 6 <<<"${GITHUB_ACTION_PATH}")"
         install_dir="${RUNNER_TEMP}/__${owner}-${repo}"
         echo "path=${install_dir}" >> "${GITHUB_OUTPUT}"
