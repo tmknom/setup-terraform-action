@@ -106,10 +106,10 @@ runs:
 
     # Provider Plugin Cache
     # https://developer.hashicorp.com/terraform/cli/config/config-file#provider-plugin-cache
-    - name: Setup plugin cache dir
+    - name: Enable plugin cache
       working-directory: ${{ steps.install.outputs.path }}
       run: |
-        echo "::group::Install Terraform"
+        echo "::group::Enable plugin cache"
         set -x
         cache_dir="${PWD}/.terraform.d/plugin-cache"
         mkdir -p "${cache_dir}"
