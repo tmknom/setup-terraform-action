@@ -20,6 +20,7 @@ description: |
 
 inputs:
   terraform-version:
+    default: latest
     required: false
     description: The version of Terraform CLI to install.
 
