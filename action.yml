@@ -104,6 +104,19 @@ runs:
         echo "::endgroup::"
       shell: bash
 
+    # Provider Plugin Cache
+    # https://developer.hashicorp.com/terraform/cli/config/config-file#provider-plugin-cache
+    - name: Setup plugin cache dir
+      working-directory: ${{ steps.install.outputs.path }}
+      run: |
+        echo "::group::Install Terraform"
+        set -x
+        cache_dir="${PWD}/.terraform.d/plugin-cache"
+        mkdir -p "${cache_dir}"
+        echo "TF_PLUGIN_CACHE_DIR=${cache_dir}" >> "${GITHUB_ENV}"
+        echo "::endgroup::"
+      shell: bash
+
     - name: Log details
       if: ${{ failure() || runner.debug }}
       working-directory: ${{ steps.install.outputs.path }}
