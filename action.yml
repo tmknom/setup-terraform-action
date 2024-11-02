@@ -27,6 +27,23 @@ runs:
   using: composite
 
   steps:
+    - name: Determine install version
+      id: version
+      env:
+        TERRAFORM_VERSION: ${{ inputs.terraform-version }}
+      run: |
+        echo "::group::Determine install version"
+        set -x
+        version="${TERRAFORM_VERSION}"
+        if [[ "${TERRAFORM_VERSION}" == "latest" ]]; then
+          api_url="https://api.github.com/repos/hashicorp/terraform/releases/latest"
+          version="$(curl --silent --show-error "${api_url}" | jq -r '.tag_name')"
+        fi
+        no_prefix="${version/v/}"
+        echo "number=${no_prefix}" >> "${GITHUB_OUTPUT}"
+        echo "::endgroup::"
+      shell: bash
+
     - name: Create install dir
       id: install
       run: |
@@ -77,7 +94,7 @@ runs:
     - name: Install Terraform
       working-directory: ${{ steps.install.outputs.path }}
       env:
-        VERSION: ${{ inputs.terraform-version }}
+        VERSION: ${{ steps.version.outputs.number }}
       run: |
         echo "::group::Install Terraform"
         set -x
