@@ -104,9 +104,9 @@ runs:
 
         # Download archive, checksum, and signature files
         base_url="https://releases.hashicorp.com/terraform/${VERSION}"
-        curl -sSLO "${base_url}/${archive_file}"
-        curl -sSLO "${base_url}/${checksum_file}"
-        curl -sSLO "${base_url}/${signature_file}"
+        curl --silent --show-error --location --remote-name "${base_url}/${archive_file}"
+        curl --silent --show-error --location --remote-name "${base_url}/${checksum_file}"
+        curl --silent --show-error --location --remote-name "${base_url}/${signature_file}"
 
         # Verify signature and checksum files
         gpg --verify "${signature_file}" "${checksum_file}"
