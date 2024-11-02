@@ -35,3 +35,69 @@ jobs:
         run: |
           set -x
           test "$(terraform -version | head -n 1)" = 'Terraform v1.2.3'
+
+  test-plugin-cache:
+    name: Test plugin cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: tmknom/checkout-action@v1
+
+      - name: Setup
+        id: setup
+        run: |
+          set -x
+          test_dir="${RUNNER_TEMP}/${GITHUB_JOB}/${GITHUB_RUN_ID}"
+
+          mkdir -p "${test_dir}/no-cache"
+          echo "no-cache-dir=${test_dir}/no-cache" >> "${GITHUB_OUTPUT}"
+          cat <<EOF >"${test_dir}/no-cache/main.tf"
+          terraform {
+            required_providers {
+              aws = {
+                source  = "hashicorp/aws"
+                version = "5.74.0"
+              }
+            }
+          }
+          EOF
+
+          mkdir -p "${test_dir}/cache"
+          echo "cache-dir=${test_dir}/cache" >> "${GITHUB_OUTPUT}"
+          cat <<EOF >"${test_dir}/cache/main.tf"
+          terraform {
+            required_providers {
+              aws = {
+                source  = "hashicorp/aws"
+                version = "5.74.0"
+              }
+            }
+          }
+          EOF
+
+      - name: Exercise
+        id: exercise
+        uses: ./
+        with:
+          terraform-version: 1.2.3
+
+      - name: Verify no cached
+        working-directory: ${{ steps.setup.outputs.no-cache-dir }}
+        run: |
+          set -x
+          pwd
+          cat main.tf
+          terraform init | tee -a init.log
+          grep "Installed hashicorp/aws v5.74.0 (signed by HashiCorp)" init.log
+
+      - name: Verify cached
+        working-directory: ${{ steps.setup.outputs.cache-dir }}
+        run: |
+          set -x
+          pwd
+          cat main.tf
+          terraform init | tee -a init.log
+          grep "Using hashicorp/aws v5.74.0 from the shared cache directory" init.log
