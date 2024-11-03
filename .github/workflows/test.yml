@@ -72,32 +72,21 @@ jobs:
         run: |
           set -x
           test_dir="${RUNNER_TEMP}/${GITHUB_JOB}/${GITHUB_RUN_ID}"
+          tf_file="${GITHUB_WORKSPACE}/.github/fixtures/main.tf"
+          lock_file="${GITHUB_WORKSPACE}/.github/fixtures/.terraform.lock.hcl"
+          cat "${tf_file}" "${lock_file}"
 
-          mkdir -p "${test_dir}/no-cache"
-          echo "no-cache-dir=${test_dir}/no-cache" >> "${GITHUB_OUTPUT}"
-          cat <<EOF >"${test_dir}/no-cache/main.tf"
-          terraform {
-            required_providers {
-              aws = {
-                source  = "hashicorp/aws"
-                version = "5.74.0"
-              }
-            }
-          }
-          EOF
+          no_cache_dir="${test_dir}/no-cache"
+          mkdir -p "${no_cache_dir}"
+          echo "no-cache-dir=${no_cache_dir}" >> "${GITHUB_OUTPUT}"
+          cp "${tf_file}" "${no_cache_dir}/main.tf"
+          cp "${lock_file}" "${no_cache_dir}/.terraform.lock.hcl"
 
-          mkdir -p "${test_dir}/cache"
-          echo "cache-dir=${test_dir}/cache" >> "${GITHUB_OUTPUT}"
-          cat <<EOF >"${test_dir}/cache/main.tf"
-          terraform {
-            required_providers {
-              aws = {
-                source  = "hashicorp/aws"
-                version = "5.74.0"
-              }
-            }
-          }
-          EOF
+          cache_dir="${test_dir}/cache"
+          mkdir -p "${cache_dir}"
+          echo "cache-dir=${cache_dir}" >> "${GITHUB_OUTPUT}"
+          cp "${tf_file}" "${cache_dir}/main.tf"
+          cp "${lock_file}" "${cache_dir}/.terraform.lock.hcl"
 
       - name: Exercise
         id: exercise
