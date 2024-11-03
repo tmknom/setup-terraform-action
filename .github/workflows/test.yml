@@ -15,8 +15,8 @@ defaults:
     shell: bash
 
 jobs:
-  test:
-    name: Test
+  test-specifying-version:
+    name: Test specifying version
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
