@@ -57,6 +57,25 @@ jobs:
           json="$(terraform version -json)"
           test "$(jq -r '.terraform_outdated' <<<"${json}")" = 'false'
 
+  test-omit-version:
+    name: Test omit version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: tmknom/checkout-action@v1
+
+      - name: Exercise
+        uses: ./
+
+      - name: Verify
+        run: |
+          set -x
+          json="$(terraform version -json)"
+          test "$(jq -r '.terraform_outdated' <<<"${json}")" = 'false'
+
   test-plugin-cache:
     name: Test plugin cache
     runs-on: ubuntu-latest
