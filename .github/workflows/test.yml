@@ -33,7 +33,8 @@ jobs:
       - name: Verify
         run: |
           set -x
-          test "$(terraform -version | head -n 1)" = 'Terraform v1.2.3'
+          json="$(terraform version -json)"
+          test "$(jq -r '.terraform_version' <<<"${json}")" = '1.2.3'
 
   test-latest-version:
     name: Test latest version
