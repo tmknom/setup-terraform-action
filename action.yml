@@ -52,7 +52,8 @@ runs:
         set -x
         repo="$(cut -d / -f 7 <<<"${GITHUB_ACTION_PATH/./${GITHUB_REPOSITORY_ID}}")"
         owner="$(cut -d / -f 6 <<<"${GITHUB_ACTION_PATH}")"
-        install_dir="${RUNNER_TEMP}/__${owner}-${repo}"
+        sha256="$(sha256sum "${GITHUB_ACTION_PATH}/action.yml" | cut -d ' ' -f 1)"
+        install_dir="${RUNNER_TEMP}/__${owner}-${repo}-${sha256}"
         echo "path=${install_dir}" >> "${GITHUB_OUTPUT}"
         mkdir -p "${install_dir}"
         echo "::endgroup::"
