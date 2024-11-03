@@ -28,7 +28,7 @@ This enables Terraform CLI commands to execute just like they do on your local e
 
 | Name | Description | Default | Required |
 | :--- | :---------- | :------ | :------: |
-| terraform-version | The version of Terraform CLI to install. | n/a | no |
+| terraform-version | The version of Terraform CLI to install. | `latest` | no |
 
 ## Outputs
 
