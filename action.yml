@@ -36,9 +36,9 @@ runs:
         repo="$(cut -d / -f 7 <<<"${GITHUB_ACTION_PATH/./${GITHUB_REPOSITORY_ID}}")"
         owner="$(cut -d / -f 6 <<<"${GITHUB_ACTION_PATH}")"
         sha256="$(sha256sum "${GITHUB_ACTION_PATH}/action.yml" | cut -d ' ' -f 1)"
-        install_dir="${RUNNER_TEMP}/__${owner}-${repo}-${sha256}"
-        echo "dir=${install_dir}" >> "${GITHUB_OUTPUT}"
-        mkdir -p "${install_dir}"
+        work_dir="${RUNNER_TEMP}/__${owner}-${repo}-${sha256}"
+        echo "dir=${work_dir}" >> "${GITHUB_OUTPUT}"
+        mkdir -p "${work_dir}"
         echo "::endgroup::"
       shell: bash
 
