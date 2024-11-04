@@ -16,6 +16,7 @@ description: |
         uses: tmknom/setup-terraform-action@v0
         with:
           terraform-version: 1.2.3
+          tfcmt-version: 4.13.0
   ```
 
 inputs:
@@ -23,6 +24,9 @@ inputs:
     default: latest
     required: false
     description: The version of Terraform CLI to install.
+  tfcmt-version:
+    required: false
+    description: The version of tfcmt to install.
 
 runs:
   using: composite
@@ -134,6 +138,62 @@ runs:
         cache_dir="${PWD}/.terraform.d/plugin-cache"
         mkdir -p "${cache_dir}"
         echo "TF_PLUGIN_CACHE_DIR=${cache_dir}" >> "${GITHUB_ENV}"
+        echo "::endgroup::"
+      shell: bash
+
+    # Cosign: Code signing and transparency for containers and binaries
+    # https://github.com/sigstore/cosign-installer
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
+
+    # slsa-verifier: Verify provenance from SLSA compliant builders
+    # https://github.com/slsa-framework/slsa-verifier
+    - name: Install slsa-verifier
+      uses: slsa-framework/slsa-verifier/actions/installer@3714a2a4684014deb874a0e737dffa0ee02dd647 # v2.6.0
+
+    # tfcmt: Post the result of terraform plan and terraform apply to Pull Request comment
+    # https://suzuki-shunsuke.github.io/tfcmt/install/
+    - name: Install tfcmt
+      working-directory: ${{ steps.work.outputs.dir }}
+      env:
+        VERSION: ${{ inputs.tfcmt-version || '4.14.0' }}
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        echo "::group::Install tfcmt"
+        set -x
+        repo="suzuki-shunsuke/tfcmt"
+        archive_file="tfcmt_linux_amd64.tar.gz"
+        checksum_file="tfcmt_${VERSION}_checksums.txt"
+        version_tag="v${VERSION}"
+
+        # Download all assets
+        gh release download "${version_tag}" --repo "${repo}"
+
+        # Verify checksum file by cosign
+        cosign verify-blob \
+          --signature "${checksum_file}.sig" \
+          --certificate "${checksum_file}.pem" \
+          --certificate-identity-regexp 'https://github\.com/suzuki-shunsuke/go-release-workflow/\.github/workflows/release\.yaml@.*' \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          "${checksum_file}"
+        grep "${archive_file}" "${checksum_file}" | sha256sum --check
+
+        # Verify SLSA provenance by slsa-verifier
+        slsa-verifier verify-artifact "${archive_file}" \
+          --provenance-path multiple.intoto.jsonl \
+          --source-uri "github.com/${repo}" \
+          --source-tag "${version_tag}"
+
+        # Verify artifact attestations by GitHub CLI
+        gh attestation verify "${archive_file}" \
+          -R "${repo}" \
+          --signer-workflow suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml
+
+        # Install binary and set path variables
+        bin_path="${PWD}/bin"
+        mkdir -p "${bin_path}"
+        tar -zxvf "${archive_file}" -C "${bin_path}"
+        echo "${bin_path}" >> "${GITHUB_PATH}"
         echo "::endgroup::"
       shell: bash
 
