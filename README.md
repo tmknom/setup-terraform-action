@@ -22,6 +22,7 @@ This enables Terraform CLI commands to execute just like they do on your local e
       uses: tmknom/setup-terraform-action@v0
       with:
         terraform-version: 1.2.3
+        tfcmt-version: 4.13.0
 ```
 
 ## Inputs
@@ -29,6 +30,7 @@ This enables Terraform CLI commands to execute just like they do on your local e
 | Name | Description | Default | Required |
 | :--- | :---------- | :------ | :------: |
 | terraform-version | The version of Terraform CLI to install. | `latest` | no |
+| tfcmt-version | The version of tfcmt to install. | n/a | no |
 
 ## Outputs
 
