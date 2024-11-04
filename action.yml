@@ -28,10 +28,10 @@ runs:
   using: composite
 
   steps:
-    - name: Create install dir
+    - name: Create working directory
       id: install
       run: |
-        echo "::group::Create install dir"
+        echo "::group::Create working directory"
         set -x
         repo="$(cut -d / -f 7 <<<"${GITHUB_ACTION_PATH/./${GITHUB_REPOSITORY_ID}}")"
         owner="$(cut -d / -f 6 <<<"${GITHUB_ACTION_PATH}")"
