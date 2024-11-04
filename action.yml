@@ -50,7 +50,7 @@ runs:
       shell: bash
 
     - name: Determine terraform version
-      id: version
+      id: terraform
       env:
         TERRAFORM_VERSION: ${{ inputs.terraform-version }}
       run: |
@@ -120,7 +120,7 @@ runs:
     - name: Install Terraform
       working-directory: ${{ steps.work.outputs.dir }}
       env:
-        VERSION: ${{ steps.version.outputs.number }}
+        VERSION: ${{ steps.terraform.outputs.number }}
       run: |
         echo "::group::Install Terraform"
         set -x
