@@ -57,12 +57,19 @@ jobs:
         uses: ./
         with:
           terraform-version: latest
+          tfcmt-version: latest
 
-      - name: Verify
+      - name: Verify Terraform
         run: |
           set -x
           json="$(terraform version -json)"
           test "$(jq -r '.terraform_outdated' <<<"${json}")" = 'false'
+
+      - name: Verify tfcmt
+        run: |
+          set -x
+          actual="$(tfcmt --version)"
+          grep 'tfcmt version 4.' <<<"${actual}"
 
   test-omit-version:
     name: Test omit version
@@ -77,11 +84,17 @@ jobs:
       - name: Exercise
         uses: ./
 
-      - name: Verify
+      - name: Verify Terraform
         run: |
           set -x
           json="$(terraform version -json)"
           test "$(jq -r '.terraform_outdated' <<<"${json}")" = 'false'
+
+      - name: Verify tfcmt
+        run: |
+          set -x
+          actual="$(tfcmt --version)"
+          grep 'tfcmt version 4.' <<<"${actual}"
 
   test-plugin-cache:
     name: Test plugin cache
