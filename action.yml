@@ -27,6 +27,7 @@ inputs:
     required: false
     description: The version of Terraform CLI to install.
   tfcmt-version:
+    default: latest
     required: false
     description: The version of tfcmt to install.
 
@@ -62,6 +63,23 @@ runs:
         fi
         no_prefix="${version/v/}"
         echo "number=${no_prefix}" >> "${GITHUB_OUTPUT}"
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Determine tfcmt version
+      id: tfcmt
+      env:
+        TFCMT_VERSION: ${{ inputs.tfcmt-version }}
+      run: |
+        echo "::group::Determine tfcmt version"
+        set -x
+        version="${TFCMT_VERSION}"
+        if [[ "${TFCMT_VERSION}" == "latest" ]]; then
+          api_url="https://api.github.com/repos/suzuki-shunsuke/tfcmt/releases/latest"
+          version="$(curl --silent --show-error "${api_url}" | jq -r '.tag_name')"
+        fi
+        no_prefix="${version/v/}"
+        echo "version=${no_prefix}" >> "${GITHUB_OUTPUT}"
         echo "::endgroup::"
       shell: bash
 
@@ -158,7 +176,7 @@ runs:
     - name: Install tfcmt
       working-directory: ${{ steps.work.outputs.dir }}
       env:
-        VERSION: ${{ inputs.tfcmt-version || '4.14.0' }}
+        VERSION: ${{ steps.tfcmt.outputs.version }}
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         echo "::group::Install tfcmt"
