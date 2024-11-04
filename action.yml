@@ -44,19 +44,19 @@ runs:
         owner="$(cut -d / -f 6 <<<"${GITHUB_ACTION_PATH}")"
         sha256="$(sha256sum "${GITHUB_ACTION_PATH}/action.yml" | cut -d ' ' -f 1)"
 
-        work_dir="${RUNNER_TEMP}/__${owner}-${repo}-${sha256}"
-        echo "base-dir=${work_dir}" >> "${GITHUB_OUTPUT}"
-        mkdir -p "${work_dir}"
+        base_dir="${RUNNER_TEMP}/__${owner}-${repo}-${sha256}"
+        echo "base-dir=${base_dir}" >> "${GITHUB_OUTPUT}"
+        mkdir -p "${base_dir}"
 
-        terraform_dir="${work_dir}/terraform"
+        terraform_dir="${base_dir}/terraform"
         echo "terraform-dir=${terraform_dir}" >> "${GITHUB_OUTPUT}"
         mkdir -p "${terraform_dir}"
 
-        tfcmt_dir="${work_dir}/tfcmt"
+        tfcmt_dir="${base_dir}/tfcmt"
         echo "tfcmt-dir=${tfcmt_dir}" >> "${GITHUB_OUTPUT}"
         mkdir -p "${tfcmt_dir}"
 
-        bin_dir="${work_dir}/bin"
+        bin_dir="${base_dir}/bin"
         echo "bin-dir=${bin_dir}" >> "${GITHUB_OUTPUT}"
         mkdir -p "${bin_dir}"
         echo "${bin_dir}" >> "${GITHUB_PATH}"
