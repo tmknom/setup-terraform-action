@@ -29,7 +29,7 @@ runs:
 
   steps:
     - name: Create working directory
-      id: install
+      id: work
       run: |
         echo "::group::Create working directory"
         set -x
@@ -62,7 +62,7 @@ runs:
     # Security at HashiCorp
     # https://www.hashicorp.com/trust/security
     - name: Import PGP public key
-      working-directory: ${{ steps.install.outputs.path }}
+      working-directory: ${{ steps.work.outputs.path }}
       env:
         EXPECTED_FINGERPRINT: C874 011F 0AB4 0511 0D02 1055 3436 5D94 72D7 468F
       run: |
@@ -94,7 +94,7 @@ runs:
     # Verify HashiCorp binary downloads
     # https://developer.hashicorp.com/well-architected-framework/operational-excellence/verify-hashicorp-binary
     - name: Install Terraform
-      working-directory: ${{ steps.install.outputs.path }}
+      working-directory: ${{ steps.work.outputs.path }}
       env:
         VERSION: ${{ steps.version.outputs.number }}
       run: |
@@ -127,7 +127,7 @@ runs:
     # Provider Plugin Cache
     # https://developer.hashicorp.com/terraform/cli/config/config-file#provider-plugin-cache
     - name: Enable plugin cache
-      working-directory: ${{ steps.install.outputs.path }}
+      working-directory: ${{ steps.work.outputs.path }}
       run: |
         echo "::group::Enable plugin cache"
         set -x
@@ -139,7 +139,7 @@ runs:
 
     - name: Log details
       if: ${{ failure() || runner.debug }}
-      working-directory: ${{ steps.install.outputs.path }}
+      working-directory: ${{ steps.work.outputs.path }}
       env:
         INPUTS: ${{ toJSON(inputs) }}
       run: |
