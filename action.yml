@@ -49,12 +49,12 @@ runs:
         echo "::endgroup::"
       shell: bash
 
-    - name: Determine install version
+    - name: Determine terraform version
       id: version
       env:
         TERRAFORM_VERSION: ${{ inputs.terraform-version }}
       run: |
-        echo "::group::Determine install version"
+        echo "::group::Determine terraform version"
         set -x
         version="${TERRAFORM_VERSION}"
         if [[ "${TERRAFORM_VERSION}" == "latest" ]]; then
