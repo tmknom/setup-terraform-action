@@ -55,6 +55,11 @@ runs:
         tfcmt_dir="${work_dir}/tfcmt"
         echo "tfcmt-dir=${tfcmt_dir}" >> "${GITHUB_OUTPUT}"
         mkdir -p "${tfcmt_dir}"
+
+        bin_dir="${work_dir}/bin"
+        echo "bin-dir=${bin_dir}" >> "${GITHUB_OUTPUT}"
+        mkdir -p "${bin_dir}"
+        echo "${bin_dir}" >> "${GITHUB_PATH}"
         echo "::endgroup::"
       shell: bash
 
@@ -130,6 +135,7 @@ runs:
       working-directory: ${{ steps.work.outputs.terraform-dir }}
       env:
         VERSION: ${{ steps.terraform.outputs.version }}
+        BIN_DIR: ${{ steps.work.outputs.bin-dir }}
       run: |
         echo "::group::Install Terraform"
         set -x
@@ -149,11 +155,8 @@ runs:
         # Verify checksum and archive files
         grep "${archive_file}" "${checksum_file}" | sha256sum --check
 
-        # Install binary and set path variables
-        bin_path="${PWD}/bin"
-        mkdir -p "${bin_path}"
-        unzip "${PWD}/${archive_file}" -d "${bin_path}"
-        echo "${bin_path}" >> "${GITHUB_PATH}"
+        # Install binary
+        unzip "${archive_file}" -d "${BIN_DIR}"
         echo "::endgroup::"
       shell: bash
 
@@ -186,6 +189,7 @@ runs:
       working-directory: ${{ steps.work.outputs.tfcmt-dir }}
       env:
         VERSION: ${{ steps.tfcmt.outputs.version }}
+        BIN_DIR: ${{ steps.work.outputs.bin-dir }}
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         echo "::group::Install tfcmt"
@@ -218,11 +222,8 @@ runs:
           -R "${repo}" \
           --signer-workflow suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml
 
-        # Install binary and set path variables
-        bin_path="${PWD}/bin"
-        mkdir -p "${bin_path}"
-        tar -zxvf "${archive_file}" -C "${bin_path}"
-        echo "${bin_path}" >> "${GITHUB_PATH}"
+        # Install binary
+        tar -zxvf "${archive_file}" -C "${BIN_DIR}"
         echo "::endgroup::"
       shell: bash
 
