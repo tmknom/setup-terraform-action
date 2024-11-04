@@ -43,9 +43,18 @@ runs:
         repo="$(cut -d / -f 7 <<<"${GITHUB_ACTION_PATH/./${GITHUB_REPOSITORY_ID}}")"
         owner="$(cut -d / -f 6 <<<"${GITHUB_ACTION_PATH}")"
         sha256="$(sha256sum "${GITHUB_ACTION_PATH}/action.yml" | cut -d ' ' -f 1)"
+
         work_dir="${RUNNER_TEMP}/__${owner}-${repo}-${sha256}"
         echo "dir=${work_dir}" >> "${GITHUB_OUTPUT}"
         mkdir -p "${work_dir}"
+
+        terraform_dir="${work_dir}/terraform"
+        echo "terraform-dir=${terraform_dir}" >> "${GITHUB_OUTPUT}"
+        mkdir -p "${terraform_dir}"
+
+        tfcmt_dir="${work_dir}/tfcmt"
+        echo "tfcmt-dir=${tfcmt_dir}" >> "${GITHUB_OUTPUT}"
+        mkdir -p "${tfcmt_dir}"
         echo "::endgroup::"
       shell: bash
 
@@ -86,7 +95,7 @@ runs:
     # Security at HashiCorp
     # https://www.hashicorp.com/trust/security
     - name: Import PGP public key
-      working-directory: ${{ steps.work.outputs.dir }}
+      working-directory: ${{ steps.work.outputs.terraform-dir }}
       env:
         EXPECTED_FINGERPRINT: C874 011F 0AB4 0511 0D02 1055 3436 5D94 72D7 468F
       run: |
@@ -118,7 +127,7 @@ runs:
     # Verify HashiCorp binary downloads
     # https://developer.hashicorp.com/well-architected-framework/operational-excellence/verify-hashicorp-binary
     - name: Install Terraform
-      working-directory: ${{ steps.work.outputs.dir }}
+      working-directory: ${{ steps.work.outputs.terraform-dir }}
       env:
         VERSION: ${{ steps.terraform.outputs.version }}
       run: |
@@ -174,7 +183,7 @@ runs:
     # tfcmt: Post the result of terraform plan and terraform apply to Pull Request comment
     # https://suzuki-shunsuke.github.io/tfcmt/install/
     - name: Install tfcmt
-      working-directory: ${{ steps.work.outputs.dir }}
+      working-directory: ${{ steps.work.outputs.tfcmt-dir }}
       env:
         VERSION: ${{ steps.tfcmt.outputs.version }}
         GITHUB_TOKEN: ${{ github.token }}
