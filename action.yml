@@ -246,3 +246,16 @@ runs:
         gpg --with-fingerprint --show-keys "${GITHUB_ACTION_PATH}/pgp-key.txt"
         echo "::endgroup::"
       shell: bash
+
+    - name: Remove unnecessary files
+      if: ${{ success() || failure() }}
+      env:
+        TERRAFORM_DIR: ${{ steps.work.outputs.terraform-dir }}
+        TFCMT_DIR: ${{ steps.work.outputs.tfcmt-dir }}
+      run: |
+        echo "::group::Remove unnecessary files"
+        set -x
+        rm -rf "${TERRAFORM_DIR}"
+        rm -rf "${TFCMT_DIR}"
+        echo "::endgroup::"
+      shell: bash
