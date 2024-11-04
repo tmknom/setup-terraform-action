@@ -6,13 +6,15 @@ Set up your GitHub Actions workflow with a specific version of Terraform.
 
 ## Description
 
-This action sets up [Terraform CLI](https://www.terraform.io/) in your GitHub Actions workflow by:
+This action sets up [Terraform CLI](https://www.terraform.io/) and
+[tfcmt](https://github.com/suzuki-shunsuke/tfcmt) in your GitHub Actions workflow by:
 
-- Downloading a specified version of Terraform CLI and adding it to the `PATH`
-- Verifying that the downloaded binary is created and signed by HashiCorp before installation
+- Installing a specified version of Terraform CLI and tfcmt
+- Verifying the authenticity and integrity of the downloaded binaries to prevent tampering
 - Setting the `TF_PLUGIN_CACHE_DIR` environment variable to enable the plugin cache
 
 This enables Terraform CLI commands to execute just like they do on your local environment.
+Additionally, tfcmt simplifies commenting on the results of Terraform CLI commands in pull requests.
 
 ## Usage
 
@@ -22,7 +24,7 @@ This enables Terraform CLI commands to execute just like they do on your local e
       uses: tmknom/setup-terraform-action@v0
       with:
         terraform-version: 1.2.3
-        tfcmt-version: 4.13.0
+        tfcmt-version: 4.14.0
 ```
 
 ## Inputs
