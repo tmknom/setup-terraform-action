@@ -28,6 +28,20 @@ runs:
   using: composite
 
   steps:
+    - name: Create install dir
+      id: install
+      run: |
+        echo "::group::Create install dir"
+        set -x
+        repo="$(cut -d / -f 7 <<<"${GITHUB_ACTION_PATH/./${GITHUB_REPOSITORY_ID}}")"
+        owner="$(cut -d / -f 6 <<<"${GITHUB_ACTION_PATH}")"
+        sha256="$(sha256sum "${GITHUB_ACTION_PATH}/action.yml" | cut -d ' ' -f 1)"
+        install_dir="${RUNNER_TEMP}/__${owner}-${repo}-${sha256}"
+        echo "path=${install_dir}" >> "${GITHUB_OUTPUT}"
+        mkdir -p "${install_dir}"
+        echo "::endgroup::"
+      shell: bash
+
     - name: Determine install version
       id: version
       env:
@@ -42,20 +56,6 @@ runs:
         fi
         no_prefix="${version/v/}"
         echo "number=${no_prefix}" >> "${GITHUB_OUTPUT}"
-        echo "::endgroup::"
-      shell: bash
-
-    - name: Create install dir
-      id: install
-      run: |
-        echo "::group::Create install dir"
-        set -x
-        repo="$(cut -d / -f 7 <<<"${GITHUB_ACTION_PATH/./${GITHUB_REPOSITORY_ID}}")"
-        owner="$(cut -d / -f 6 <<<"${GITHUB_ACTION_PATH}")"
-        sha256="$(sha256sum "${GITHUB_ACTION_PATH}/action.yml" | cut -d ' ' -f 1)"
-        install_dir="${RUNNER_TEMP}/__${owner}-${repo}-${sha256}"
-        echo "path=${install_dir}" >> "${GITHUB_OUTPUT}"
-        mkdir -p "${install_dir}"
         echo "::endgroup::"
       shell: bash
 
