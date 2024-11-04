@@ -49,12 +49,12 @@ runs:
         echo "::endgroup::"
       shell: bash
 
-    - name: Determine install version
-      id: version
+    - name: Determine terraform version
+      id: terraform
       env:
         TERRAFORM_VERSION: ${{ inputs.terraform-version }}
       run: |
-        echo "::group::Determine install version"
+        echo "::group::Determine terraform version"
         set -x
         version="${TERRAFORM_VERSION}"
         if [[ "${TERRAFORM_VERSION}" == "latest" ]]; then
@@ -62,7 +62,7 @@ runs:
           version="$(curl --silent --show-error "${api_url}" | jq -r '.tag_name')"
         fi
         no_prefix="${version/v/}"
-        echo "number=${no_prefix}" >> "${GITHUB_OUTPUT}"
+        echo "version=${no_prefix}" >> "${GITHUB_OUTPUT}"
         echo "::endgroup::"
       shell: bash
 
@@ -120,7 +120,7 @@ runs:
     - name: Install Terraform
       working-directory: ${{ steps.work.outputs.dir }}
       env:
-        VERSION: ${{ steps.version.outputs.number }}
+        VERSION: ${{ steps.terraform.outputs.version }}
       run: |
         echo "::group::Install Terraform"
         set -x
