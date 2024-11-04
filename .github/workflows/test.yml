@@ -29,12 +29,19 @@ jobs:
         uses: ./
         with:
           terraform-version: 1.2.3
+          tfcmt-version: 4.14.0
 
-      - name: Verify
+      - name: Verify Terraform
         run: |
           set -x
           json="$(terraform version -json)"
           test "$(jq -r '.terraform_version' <<<"${json}")" = '1.2.3'
+
+      - name: Verify tfcmt
+        run: |
+          set -x
+          actual="$(tfcmt --version)"
+          grep 'tfcmt version 4.14.0' <<<"${actual}"
 
   test-latest-version:
     name: Test latest version
