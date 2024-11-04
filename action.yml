@@ -192,17 +192,26 @@ runs:
         echo "::group::Install tfcmt"
         set -x
         repo="suzuki-shunsuke/tfcmt"
-        archive_file="tfcmt_linux_amd64.tar.gz"
-        checksum_file="tfcmt_${VERSION}_checksums.txt"
         version_tag="v${VERSION}"
 
-        # Download all assets
-        gh release download "${version_tag}" --repo "${repo}"
+        archive_file="tfcmt_linux_amd64.tar.gz"
+        checksum_file="tfcmt_${VERSION}_checksums.txt"
+        signature_file="${checksum_file}.sig"
+        certificate_file="${checksum_file}.pem"
+        provenance_file="multiple.intoto.jsonl"
+
+        # Download asset files
+        base_url="https://github.com/${repo}/releases/download/${version_tag}"
+        curl --silent --show-error --fail --location --remote-name "${base_url}/${archive_file}"
+        curl --silent --show-error --fail --location --remote-name "${base_url}/${checksum_file}"
+        curl --silent --show-error --fail --location --remote-name "${base_url}/${signature_file}"
+        curl --silent --show-error --fail --location --remote-name "${base_url}/${certificate_file}"
+        curl --silent --show-error --fail --location --remote-name "${base_url}/${provenance_file}"
 
         # Verify checksum file by cosign
         cosign verify-blob \
-          --signature "${checksum_file}.sig" \
-          --certificate "${checksum_file}.pem" \
+          --signature "${signature_file}" \
+          --certificate "${certificate_file}" \
           --certificate-identity-regexp 'https://github\.com/suzuki-shunsuke/go-release-workflow/\.github/workflows/release\.yaml@.*' \
           --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
           "${checksum_file}"
@@ -210,7 +219,7 @@ runs:
 
         # Verify SLSA provenance by slsa-verifier
         slsa-verifier verify-artifact "${archive_file}" \
-          --provenance-path multiple.intoto.jsonl \
+          --provenance-path "${provenance_file}" \
           --source-uri "github.com/${repo}" \
           --source-tag "${version_tag}"
 
