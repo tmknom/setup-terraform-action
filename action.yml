@@ -45,7 +45,7 @@ runs:
         sha256="$(sha256sum "${GITHUB_ACTION_PATH}/action.yml" | cut -d ' ' -f 1)"
 
         work_dir="${RUNNER_TEMP}/__${owner}-${repo}-${sha256}"
-        echo "dir=${work_dir}" >> "${GITHUB_OUTPUT}"
+        echo "base-dir=${work_dir}" >> "${GITHUB_OUTPUT}"
         mkdir -p "${work_dir}"
 
         terraform_dir="${work_dir}/terraform"
@@ -163,7 +163,7 @@ runs:
     # Provider Plugin Cache
     # https://developer.hashicorp.com/terraform/cli/config/config-file#provider-plugin-cache
     - name: Enable plugin cache
-      working-directory: ${{ steps.work.outputs.dir }}
+      working-directory: ${{ steps.work.outputs.base-dir }}
       run: |
         echo "::group::Enable plugin cache"
         set -x
@@ -229,7 +229,7 @@ runs:
 
     - name: Log details
       if: ${{ failure() || runner.debug }}
-      working-directory: ${{ steps.work.outputs.dir }}
+      working-directory: ${{ steps.work.outputs.base-dir }}
       env:
         INPUTS: ${{ toJSON(inputs) }}
       run: |
