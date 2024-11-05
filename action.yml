@@ -60,6 +60,12 @@ runs:
         echo "bin-dir=${bin_dir}" >> "${GITHUB_OUTPUT}"
         mkdir -p "${bin_dir}"
         echo "${bin_dir}" >> "${GITHUB_PATH}"
+
+        # Create plugin cache directory and enable provider plugin cache
+        # https://developer.hashicorp.com/terraform/cli/config/config-file#provider-plugin-cache
+        plugin_cache_dir="${base_dir}/plugin-cache"
+        mkdir -p "${plugin_cache_dir}"
+        echo "TF_PLUGIN_CACHE_DIR=${plugin_cache_dir}" >> "${GITHUB_ENV}"
         echo "::endgroup::"
       shell: bash
 
@@ -157,19 +163,6 @@ runs:
 
         # Install binary
         unzip "${archive_file}" -d "${BIN_DIR}"
-        echo "::endgroup::"
-      shell: bash
-
-    # Provider Plugin Cache
-    # https://developer.hashicorp.com/terraform/cli/config/config-file#provider-plugin-cache
-    - name: Enable plugin cache
-      working-directory: ${{ steps.work.outputs.base-dir }}
-      run: |
-        echo "::group::Enable plugin cache"
-        set -x
-        cache_dir="${PWD}/.terraform.d/plugin-cache"
-        mkdir -p "${cache_dir}"
-        echo "TF_PLUGIN_CACHE_DIR=${cache_dir}" >> "${GITHUB_ENV}"
         echo "::endgroup::"
       shell: bash
 
