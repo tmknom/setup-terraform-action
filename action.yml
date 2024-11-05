@@ -170,15 +170,36 @@ runs:
         echo "::endgroup::"
       shell: bash
 
+    - name: Check verification tool is installed
+      id: installed
+      run: |
+        echo "::group::Check verification tool is installed"
+        set -x
+        installed_cosign="false"
+        if [ "$(which cosign)" ]; then
+          installed_cosign="true"
+        fi;
+        echo "cosign=${installed_cosign}" >> "${GITHUB_OUTPUT}"
+
+        installed_slsa_verifier="false"
+        if [ "$(which slsa-verifier)" ]; then
+          installed_slsa_verifier="true"
+        fi;
+        echo "slsa-verifier=${installed_slsa_verifier}" >> "${GITHUB_OUTPUT}"
+        echo "::endgroup::"
+      shell: bash
+
     # Cosign: Code signing and transparency for containers and binaries
     # https://github.com/sigstore/cosign-installer
     - name: Install Cosign
       uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
+      if: ${{ steps.installed.outputs.cosign == 'false' }}
 
     # slsa-verifier: Verify provenance from SLSA compliant builders
     # https://github.com/slsa-framework/slsa-verifier
     - name: Install slsa-verifier
       uses: slsa-framework/slsa-verifier/actions/installer@3714a2a4684014deb874a0e737dffa0ee02dd647 # v2.6.0
+      if: ${{ steps.installed.outputs.slsa-verifier == 'false' }}
 
     # tfcmt: Post the result of terraform plan and terraform apply to Pull Request comment
     # https://suzuki-shunsuke.github.io/tfcmt/install/
