@@ -229,7 +229,8 @@ runs:
           --signer-workflow suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml
 
         # Install binary
-        tar -zxvf "${archive_file}" -C "${BIN_DIR}"
+        tar -zxvf "${archive_file}"
+        mv tfcmt "${BIN_DIR}"
         echo "::endgroup::"
       shell: bash
 
