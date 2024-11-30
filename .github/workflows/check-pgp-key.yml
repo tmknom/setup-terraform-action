@@ -1,0 +1,70 @@
+# Workflow for periodically verifying PGP Key renewal
+#
+# PGP keys have expiration dates and require regular updates.
+# This workflow monitors the `pgp-key.txt` file for changes.
+# If a difference is detected, the workflow exits with an error.
+---
+name: Check PGP key
+on:
+  workflow_dispatch:
+  schedule:
+    #        ┌───────────── minute (0 - 59)
+    #        │ ┌───────────── hour (0 - 23)
+    #        │ │  ┌───────────── day of the month (1 - 31)
+    #        │ │  │ ┌───────────── month (1 - 12 or JAN-DEC)
+    #        │ │  │ │ ┌───────────── day of the week (0 - 6 or SUN-SAT)
+    #        │ │  │ │ │
+    - cron: '0 23 15 * *'
+  pull_request:
+    paths: [".github/workflows/check-pgp-key.yml"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: tmknom/checkout-action@v1
+
+      - name: Download PGP key
+        id: download
+        env:
+          URL: https://www.hashicorp.com/.well-known/pgp-key.txt
+        run: |
+          set -x
+          downloaded="${RUNNER_TEMP}/downloaded.txt"
+          curl --silent --show-error --fail --location --output "${downloaded}" "${URL}"
+          echo "file=${downloaded}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check
+        env:
+          DOWNLOADED: ${{ steps.download.outputs.file }}
+        run: |
+          set -x
+          diff "${DOWNLOADED}" "${GITHUB_WORKSPACE}/pgp-key.txt"
+
+      - name: Output job summary
+        if: ${{ failure() }}
+        run: |
+          set -x
+          cat <<EOF >"${GITHUB_STEP_SUMMARY}"
+          ## [Action Required] PGP key has been updated
+          Check the following URL to confirm the update.
+
+          - https://www.hashicorp.com/trust/security
+
+          If the PGP key has been updated, follow the instructions provided in the link to download and replace \`pgp-key.txt\`.
+          Make sure to also update the hard-coded **fingerprint** in \`action.yml\`.
+          EOF
