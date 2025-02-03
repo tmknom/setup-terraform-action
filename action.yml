@@ -26,6 +26,9 @@ inputs:
     default: latest
     required: false
     description: The version of Terraform CLI to install.
+  terraform-version-file:
+    required: false
+    description: Path to the Terraform version file, such as `.terraform-version`.
   tfcmt-version:
     default: latest
     required: false
@@ -77,16 +80,19 @@ runs:
       id: terraform
       env:
         TERRAFORM_VERSION: ${{ inputs.terraform-version }}
+        TERRAFORM_VERSION_FILE: ${{ inputs.terraform-version-file }}
       run: |
         echo "::group::Determine terraform version"
         set -x
-        version="${TERRAFORM_VERSION}"
-        if [[ "${TERRAFORM_VERSION}" == "latest" ]]; then
+        if [[ "${TERRAFORM_VERSION_FILE}" != "" && -f "${TERRAFORM_VERSION_FILE}" ]]; then
+          version="$(cat "${TERRAFORM_VERSION_FILE}")"
+        elif [[ "${TERRAFORM_VERSION}" != "" && "${TERRAFORM_VERSION}" != "latest" ]]; then
+          version="${TERRAFORM_VERSION}"
+        else
           api_url="https://api.github.com/repos/hashicorp/terraform/releases/latest"
           version="$(curl --silent --show-error "${api_url}" | jq -r '.tag_name')"
         fi
-        no_prefix="${version/v/}"
-        echo "version=${no_prefix}" >> "${GITHUB_OUTPUT}"
+        echo "version=${version/v/}" >> "${GITHUB_OUTPUT}"
         echo "::endgroup::"
       shell: bash
 
