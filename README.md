@@ -32,6 +32,7 @@ Additionally, tfcmt simplifies commenting on the results of Terraform CLI comman
 | Name | Description | Default | Required |
 | :--- | :---------- | :------ | :------: |
 | terraform-version | The version of Terraform CLI to install. | `latest` | no |
+| terraform-version-file | Path to the Terraform version file, such as `.terraform-version`. | n/a | no |
 | tfcmt-version | The version of tfcmt to install. | `latest` | no |
 
 ## Outputs
