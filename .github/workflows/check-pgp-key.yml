@@ -36,7 +36,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: tmknom/checkout-action@v1
+        uses: tmknom/secure-checkout-action@v1
 
       - name: Download PGP key
         id: download
